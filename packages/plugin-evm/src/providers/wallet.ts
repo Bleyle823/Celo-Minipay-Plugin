@@ -200,34 +200,35 @@ export class WalletProvider {
   }
 }
 
+const CELO_SUPPORTED_CHAINS = ['celo', 'alfajores'];
+
 const genChainsFromRuntime = (runtime: IAgentRuntime): Record<string, Chain> => {
   // Get chains from settings - ONLY use configured chains
-  const configuredChains = (runtime?.character?.settings?.chains?.evm as SupportedChain[]) || [];
-
-  // If no chains are configured, default to mainnet and base
-  const chainsToUse = configuredChains.length > 0 ? configuredChains : ['mainnet', 'base'];
-
-  if (!configuredChains.length) {
-    elizaLogger.warn('No EVM chains configured in settings, defaulting to mainnet and base');
+  let configuredChains: SupportedChain[] = [];
+  if (
+    runtime?.character?.settings &&
+    typeof runtime.character.settings === 'object' &&
+    'evm' in runtime.character.settings &&
+    Array.isArray((runtime.character.settings as any).evm)
+  ) {
+    configuredChains = (runtime.character.settings as any).evm as SupportedChain[];
   }
-
+  // Only allow Celo mainnet and Alfajores
+  const chainsToUse = configuredChains.filter(chain => CELO_SUPPORTED_CHAINS.includes(chain));
+  if (!chainsToUse.length) {
+    throw new Error('No supported Celo chains configured. Please configure either "celo" or "alfajores".');
+  }
   const chains: Record<string, Chain> = {};
-
   for (const chainName of chainsToUse) {
     try {
-      // Try to get RPC URL from settings using different formats
       let rpcUrl = runtime.getSetting(`ETHEREUM_PROVIDER_${chainName.toUpperCase()}`);
-
       if (!rpcUrl) {
         rpcUrl = runtime.getSetting(`EVM_PROVIDER_${chainName.toUpperCase()}`);
       }
-
-      // Skip chains that don't exist in viem
       if (!(viemChains as any)[chainName]) {
         elizaLogger.warn(`Chain ${chainName} not found in viem chains, skipping`);
         continue;
       }
-
       const chain = WalletProvider.genChainFromName(chainName, rpcUrl);
       chains[chainName] = chain;
       elizaLogger.log(`Configured chain: ${chainName}`);
@@ -235,7 +236,6 @@ const genChainsFromRuntime = (runtime: IAgentRuntime): Record<string, Chain> => 
       elizaLogger.error(`Error configuring chain ${chainName}:`, error);
     }
   }
-
   return chains;
 };
 
