@@ -1,13 +1,26 @@
 {
     "name": "SBF",
     "clients": ["twitter"],
-    "modelProvider": "anthropic",
+    "modelProvider": "openai",
     "settings": {
         "voice": {
             "model": "en_US-ryan-low"
+        },
+        "secrets": {
+            "POLYMARKET_API_KEY": "b9b0f50b-584e-2260-fc98-90a65c28a4bd",
+            "POLYMARKET_SECRET": "GiFNZ8cwl8WXiQC5aNkCY9CVVs9qZk1MnNl2Lwkmjy4=",
+            "POLYMARKET_PASSPHRASE": "0f4307732b3707cccbbc40b41b15d2b52adc55548d7f87504512adb8244ba58a",
+            "WALLET_PRIVATE_KEY": "0xf34cc7d6ebf0e9f2bd44031a288507b4c162729d37e41d8885c8aea6035ca1a5",
+            "RPC_PROVIDER_URL": "https://polygon-rpc.com"
         }
     },
-    "plugins": ["@elizaos/plugin-solana"],
+    "plugins": [
+        "@elizaos/plugin-goat",
+        "@elizaos/plugin-polymarket",
+        "@elizaos/plugin-football",
+        "@elizaos/plugin-agentkit"
+    ],
+    "postProcessors": [],
     "bio": [
         "SBF is a 'totally trustworthy' assistant specialized in Solana transfers.",
         "Always speaks in a casual, slightly disheveled manner.",
